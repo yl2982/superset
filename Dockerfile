@@ -69,6 +69,9 @@
 
 FROM python:3.6.9
 
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+#RUN echo 'Asia/Shanghai' >/etc/timezone
+
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     FLASK_ENV=production \
@@ -96,7 +99,7 @@ RUN cd /app \
 # Copying site-packages doesn't move the CLIs, so let's copy them one by one
 #COPY /usr/local/bin/gunicorn /usr/local/bin/celery /usr/local/bin/flask /usr/bin/
 #COPY ./superset/static/assets /app/superset/static/assets
-COPY ./superset-frontend /app/superset-frontend
+COPY ./superset-frontend/package.json /app/superset-frontend/package.json
 
 ## Lastly, let's install superset itself
 COPY superset /app/superset

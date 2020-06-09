@@ -10,7 +10,6 @@ class CustomSsoSecurityManager(SupersetSecurityManager):
         if provider == 'boss':
             me = self.appbuilder.sm.oauth_remotes[provider].get('/boss/openapi/user/info?permission=SupersetLogin')
             result = me.data
-            logging.debug("user response: {0}.".format(result))
-            return {'first_name': result['nick'], 'username': result['username'], 'email': result['userId']}
+            return {'first_name': result['nick'], 'username': result['userId'], 'email': result['userId']}
 
     ...

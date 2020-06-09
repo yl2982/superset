@@ -85,6 +85,7 @@ wtforms==2.2.1            # via flask-wtf, wtforms-json
 zipp==2.0.0               # via importlib-metadata
 flask_oauthlib==0.9.5
 mysqlclient==1.4.6
+requests-oauthlib==1.1.0
 oauthlib==2.1.0
 redis==3.3.10
 psycopg2==2.8.5
