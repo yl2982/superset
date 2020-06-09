@@ -18,54 +18,56 @@
 ######################################################################
 # PY stage that simply does a pip install on our requirements
 ######################################################################
-ARG PY_VER=3.6.9
-FROM python:${PY_VER} AS superset-py
-
-RUN mkdir /app \
-        && apt-get update -y \
-        && apt-get install -y --no-install-recommends \
-            build-essential \
-            default-libmysqlclient-dev \
-            libpq-dev \
-        && rm -rf /var/lib/apt/lists/*
-
-# First, we just wanna install requirements, which will allow us to utilize the cache
-# in order to only build if and only if requirements change
-COPY ./requirements.txt /app/
-RUN cd /app \
-        && pip install --no-cache -r requirements.txt
+#ARG PY_VER=3.6.9
+#FROM python:${PY_VER} AS superset-py
+#
+#RUN mkdir /app \
+#        && apt-get update -y \
+#        && apt-get install -y --no-install-recommends \
+#            build-essential \
+#            default-libmysqlclient-dev \
+#            libpq-dev \
+#        && rm -rf /var/lib/apt/lists/*
+#
+## First, we just wanna install requirements, which will allow us to utilize the cache
+## in order to only build if and only if requirements change
+#COPY ./requirements.txt /app/
+#RUN cd /app \
+#        && pip install --no-cache -r requirements.txt
 
 
 ######################################################################
 # Node stage to deal with static asset construction
 ######################################################################
-FROM node:10-jessie AS superset-node
-
-ARG NPM_BUILD_CMD="build"
-ENV BUILD_CMD=${NPM_BUILD_CMD}
-
-# NPM ci first, as to NOT invalidate previous steps except for when package.json changes
-RUN mkdir -p /app/superset-frontend
-RUN mkdir -p /app/superset/assets
-COPY ./docker/frontend-mem-nag.sh /
-COPY ./superset-frontend/package* /app/superset-frontend/
-RUN /frontend-mem-nag.sh \
-        && cd /app/superset-frontend \
-        && npm ci
-
-# Next, copy in the rest and let webpack do its thing
-COPY ./superset-frontend /app/superset-frontend
-# This is BY FAR the most expensive step (thanks Terser!)
-RUN cd /app/superset-frontend \
-        && npm run ${BUILD_CMD} \
-        && rm -rf node_modules
+#FROM node:10-jessie AS superset-node
+#
+#ARG NPM_BUILD_CMD="build"
+#ENV BUILD_CMD=${NPM_BUILD_CMD}
+#
+## NPM ci first, as to NOT invalidate previous steps except for when package.json changes
+#RUN mkdir -p /app/superset-frontend
+#RUN mkdir -p /app/superset/assets
+#COPY ./docker/frontend-mem-nag.sh /
+#COPY ./superset-frontend/package* /app/superset-frontend/
+#RUN /frontend-mem-nag.sh \
+#        && cd /app/superset-frontend \
+#        && npm ci
+#
+## Next, copy in the rest and let webpack do its thing
+#COPY ./superset-frontend /app/superset-frontend
+## This is BY FAR the most expensive step (thanks Terser!)
+#RUN cd /app/superset-frontend \
+#        && npm run ${BUILD_CMD} \
+#        && rm -rf node_modules
 
 
 ######################################################################
 # Final lean image...
 ######################################################################
-ARG PY_VER=3.6.9
-FROM python:${PY_VER} AS lean
+#ARG PY_VER=3.6.9
+#FROM python:${PY_VER} AS lean
+
+FROM python:3.6.9
 
 ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
@@ -84,11 +86,17 @@ RUN useradd --user-group --no-create-home --no-log-init --shell /bin/bash supers
             libpq-dev \
         && rm -rf /var/lib/apt/lists/*
 
-COPY --from=superset-py /usr/local/lib/python3.6/site-packages/ /usr/local/lib/python3.6/site-packages/
+# First, we just wanna install requirements, which will allow us to utilize the cache
+# in order to only build if and only if requirements change
+COPY ./requirements.txt /app/
+RUN cd /app \
+        && pip install --no-cache -r requirements.txt
+
+#COPY /usr/local/lib/python3.7/site-packages/ /usr/local/lib/python3.6/site-packages/
 # Copying site-packages doesn't move the CLIs, so let's copy them one by one
-COPY --from=superset-py /usr/local/bin/gunicorn /usr/local/bin/celery /usr/local/bin/flask /usr/bin/
-COPY --from=superset-node /app/superset/static/assets /app/superset/static/assets
-COPY --from=superset-node /app/superset-frontend /app/superset-frontend
+#COPY /usr/local/bin/gunicorn /usr/local/bin/celery /usr/local/bin/flask /usr/bin/
+#COPY ./superset/static/assets /app/superset/static/assets
+COPY ./superset-frontend /app/superset-frontend
 
 ## Lastly, let's install superset itself
 COPY superset /app/superset
@@ -106,18 +114,19 @@ USER superset
 HEALTHCHECK CMD ["curl", "-f", "http://localhost:8088/health"]
 
 EXPOSE ${SUPERSET_PORT}
-
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost:8080/ || exit 1
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
 
 ######################################################################
 # Dev image...
 ######################################################################
-FROM lean AS dev
-
-COPY ./requirements-dev.txt ./docker/requirements* /app/
-
-USER root
-RUN cd /app \
-    && pip install --no-cache -r requirements-dev.txt -r requirements-extra.txt \
-    && pip install --no-cache -r requirements-local.txt || true
-USER superset
+#FROM lean AS dev
+#
+#COPY ./requirements-dev.txt ./docker/requirements* /app/
+#
+#USER root
+#RUN cd /app \
+#    && pip install --no-cache -r requirements-dev.txt -r requirements-extra.txt \
+#    && pip install --no-cache -r requirements-local.txt || true
+#USER superset
