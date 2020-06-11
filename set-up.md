@@ -10,7 +10,6 @@
 
 SUPERSET_HOME : superset 项目目录
 
-<<<<<<< HEAD
 ```shell script
 git clone git@atta-gitlab.chinanorth2.cloudapp.chinacloudapi.cn:atta-team/dev/atta-superset.git ${SUPERSET_HOME}
 ```
@@ -23,15 +22,6 @@ cd ${SUPERSET_HOME}/superset-frontend/
 
 npm install
 
-=======
-1. 打包前端文件
-
-
-
-```shell script
-cd ${SUPERSET_HOME}/superset-frontend/
-
->>>>>>> ebdab982ea5bbc60d3a01f1b32f72ba4ed2ab79f
 npm run build
 ```
 
@@ -80,7 +70,7 @@ mkdir /var/data/superset/logs
 
 5. 启动 superset
 ```shell script
-docker run -d --name superset --rm -p 5000:8080 -v ~/Superset:/app/pythonpath -v /var/data/superset/logs:/app/superset_home --privileged=true atta/superset:${TAG}
+docker run -d --name superset --rm -p 5000:8080 -v ~/Superset:/app/pythonpath -v /var/data/superset/logs:/app/superset_home --add-host=boss.xtadmins.com:172.**.**.8 --privileged=true atta/superset:${TAG}
 ```
 
 6. 初始化 superset
