@@ -10,6 +10,7 @@
 
 SUPERSET_HOME : superset 项目目录
 
+<<<<<<< HEAD
 ```shell script
 git clone git@atta-gitlab.chinanorth2.cloudapp.chinacloudapi.cn:atta-team/dev/atta-superset.git ${SUPERSET_HOME}
 ```
@@ -22,6 +23,15 @@ cd ${SUPERSET_HOME}/superset-frontend/
 
 npm install
 
+=======
+1. 打包前端文件
+
+
+
+```shell script
+cd ${SUPERSET_HOME}/superset-frontend/
+
+>>>>>>> ebdab982ea5bbc60d3a01f1b32f72ba4ed2ab79f
 npm run build
 ```
 
@@ -104,6 +114,7 @@ import os
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 ## ==================================
+
 
 ## Security 子菜单
 # Base Permissions, Views/Menus, Permission on Views/Menus, Row level security filter
