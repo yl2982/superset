@@ -68,7 +68,6 @@ import TimeTable from '../explore/controlPanels/TimeTable';
 import Treemap from '../explore/controlPanels/Treemap';
 import WordCloud from '../explore/controlPanels/WordCloud';
 import WorldMap from '../explore/controlPanels/WorldMap';
-import {Funnel} from "../explore/controlPanels/echart";
 export default function setupPlugins() {
   new MainPreset().register();
 
@@ -121,8 +120,7 @@ export default function setupPlugins() {
     .registerValue('deck_path', DeckPath)
     .registerValue('deck_polygon', DeckPolygon)
     .registerValue('deck_scatter', DeckScatter)
-    .registerValue('deck_screengrid', DeckScreengrid)
-    .registerValue('echart_funnel', Funnel);
+    .registerValue('deck_screengrid', DeckScreengrid);
 
   setupPluginsExtra();
 }
