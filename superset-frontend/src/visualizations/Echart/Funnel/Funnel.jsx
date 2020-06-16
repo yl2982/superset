@@ -72,14 +72,12 @@ class Funnel extends React.PureComponent {
     }
 
     componentDidMount() {
-        console.log(this.ref);
         const myChart = echarts.init(this.ref.current);
         const json = this.props.data;
         json.map(a => a.name = a.name.toString());
         option.series.forEach(a => a.data = json);
         option.legend.data = json.map(a => a.name);
         myChart.setOption(option);
-
     }
 
     render() {
