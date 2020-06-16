@@ -2884,6 +2884,62 @@ class PartitionViz(NVD3TimeSeriesViz):
         return self.nest_values(levels)
 
 
+class EchartFunnel(BaseViz):
+
+    """EChart Funnel chart"""
+
+    viz_type = "echart_funnel"
+    verbose_name = _("echart Funnel")
+    is_timeseries = False
+    credits = (
+        "Jia Qi "
+        '@<a href="https://bl.ocks.org/kerryrodden/7090426">bl.ocks.org</a>'
+    )
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        fd = self.form_data
+        logger.debug("form_data is {} ,df is {}",fd,df)
+
+        fd = self.form_data
+        metric = self.metric_labels[0]
+        columns = fd.get('groupby')
+        print(metric)
+        df = df.pivot_table(
+            index=self.groupby,
+            values=[metric]
+        )
+        df.sort_values(by=metric, ascending=False, inplace=True)
+        df = df.reset_index()
+        df.columns = ['name', 'value']
+        return df.to_dict(orient='records')
+
+        #
+        # cols = fd.get("groupby") or []
+        # cols.extend(["m1", "m2"])
+        # metric = utils.get_metric_name(fd.get("metric"))
+        # secondary_metric = utils.get_metric_name(fd.get("secondary_metric"))
+        # if metric == secondary_metric or secondary_metric is None:
+        #     df.rename(columns={df.columns[-1]: "m1"}, inplace=True)
+        #     df["m2"] = df["m1"]
+        # else:
+        #     df.rename(columns={df.columns[-2]: "m1"}, inplace=True)
+        #     df.rename(columns={df.columns[-1]: "m2"}, inplace=True)
+        #
+        # # Re-order the columns as the query result set column ordering may differ from
+        # # that listed in the hierarchy.
+        # df = df[cols]
+        # return df.to_numpy().tolist()
+
+    def query_obj(self):
+        qry = super().query_obj()
+        fd = self.form_data
+        logger.debug("qry is {},fd is {}", qry,fd)
+        # qry["metrics"] = [fd["metric"]]
+        # secondary_metric = fd.get("secondary_metric")
+        # if secondary_metric and secondary_metric != fd["metric"]:
+        #     qry["metrics"].append(secondary_metric)
+        return qry
+
 viz_types = {
     o.viz_type: o
     for o in globals().values()
