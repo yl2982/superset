@@ -26,6 +26,10 @@ npm run build
 ```
 
 2. 制作镜像
+构建基础镜像
+```shell script
+docker build -f atta/base/Dockerfile -t atta/base_superset .
+```
 
 ```shell script
 
@@ -33,7 +37,7 @@ cd ${SUPERSET_HOME}
 
 time=$(date "+%Y%m%d%H%M%S")
 
-docker build -t atta/superset:${time} .
+docker build -f atta/Dockerfile -t atta/superset:${time} .
 ```
 
 

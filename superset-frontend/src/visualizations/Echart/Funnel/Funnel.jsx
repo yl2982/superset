@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import echarts from 'echarts';
 import {isEqual} from "lodash-es";
+import './Funnel.less'
 
 
 class Funnel extends React.PureComponent {
@@ -16,7 +17,7 @@ class Funnel extends React.PureComponent {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (!isEqual(prevProps, this.props)) {
-            this.dispose();
+            // this.dispose();
             this.rerender(); // 重建
         }
     }
@@ -98,7 +99,7 @@ class Funnel extends React.PureComponent {
     render() {
         const {height, width} = this.props;
         return (
-            <div ref={this.ref} style={{width, height}}></div>
+            <div className="echart-funnel" ref={this.ref} style={{width, height}}></div>
         );
     }
 }
