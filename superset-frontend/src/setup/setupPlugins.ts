@@ -68,7 +68,6 @@ import TimeTable from '../explore/controlPanels/TimeTable';
 import Treemap from '../explore/controlPanels/Treemap';
 import WordCloud from '../explore/controlPanels/WordCloud';
 import WorldMap from '../explore/controlPanels/WorldMap';
-
 export default function setupPlugins() {
   new MainPreset().register();
 

@@ -10,17 +10,26 @@
 
 SUPERSET_HOME : superset 项目目录
 
-1. 打包前端文件
+```shell script
+git clone git@atta-gitlab.chinanorth2.cloudapp.chinacloudapi.cn:atta-team/dev/atta-superset.git ${SUPERSET_HOME}
+```
 
+1. 打包前端文件
 
 
 ```shell script
 cd ${SUPERSET_HOME}/superset-frontend/
 
+npm install
+
 npm run build
 ```
 
 2. 制作镜像
+构建基础镜像
+```shell script
+docker build -f atta/base/Dockerfile -t atta/base_superset .
+```
 
 ```shell script
 
@@ -28,7 +37,7 @@ cd ${SUPERSET_HOME}
 
 time=$(date "+%Y%m%d%H%M%S")
 
-docker build -t atta/superset:${time} .
+docker build -f atta/Dockerfile -t atta/superset:${time} .
 ```
 
 
@@ -65,7 +74,7 @@ mkdir /var/data/superset/logs
 
 5. 启动 superset
 ```shell script
-docker run -d --name superset --rm -p 5000:8080 -v ~/Superset:/app/pythonpath -v /var/data/superset/logs:/app/superset_home --privileged=true atta/superset:${TAG}
+docker run -d --name superset --rm -p 5000:8080 -v ~/Superset:/app/pythonpath -v /var/data/superset/logs:/app/superset_home --add-host=boss.xtadmins.com:172.**.**.8 --privileged=true atta/superset:${TAG}
 ```
 
 6. 初始化 superset
@@ -101,7 +110,22 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 ## ==================================
 
 
-## 日志配置 /app/superset_home
+## Security 子菜单
+# Base Permissions, Views/Menus, Permission on Views/Menus, Row level security filter
+# 需要`docker exec -it superset superset init`，才生效
+FAB_ADD_SECURITY_PERMISSION_VIEW = True
+FAB_ADD_SECURITY_VIEW_MENU_VIEW = True
+FAB_ADD_SECURITY_PERMISSION_VIEWS_VIEW = True
+
+ENABLE_ROW_LEVEL_SECURITY = True
+
+
+# Set this to false if you don't want users to be able to request/grant
+# datasource access requests from/to other users.
+ENABLE_ACCESS_REQUEST = True
+
+## 日志配置
+# 容器内挂载目录 /app/superset_home
 
 ENABLE_TIME_ROTATE = True
 LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"

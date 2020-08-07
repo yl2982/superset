@@ -2884,6 +2884,27 @@ class PartitionViz(NVD3TimeSeriesViz):
         return self.nest_values(levels)
 
 
+class EchartFunnel(BaseViz):
+
+    """EChart Funnel chart"""
+
+    viz_type = "echart_funnel"
+    verbose_name = _("echart Funnel")
+    is_timeseries = False
+    credits = ("Jia Qi")
+
+    def get_data(self, df: pd.DataFrame) -> VizData:
+        metric = self.metric_labels[0]
+        df = df.pivot_table(
+            index=self.groupby,
+            values=[metric]
+        )
+        df.sort_values(by=metric, ascending=False, inplace=True)
+        df = df.reset_index()
+        df.columns = ['name', 'value']
+        return df.to_dict(orient='records')
+
+
 viz_types = {
     o.viz_type: o
     for o in globals().values()
