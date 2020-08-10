@@ -67,7 +67,7 @@
 #ARG PY_VER=3.6.9
 #FROM python:${PY_VER} AS lean
 
-FROM atta/base_superst:latest
+FROM atta/base_superset:latest
 
 COPY ./atta/requirements-extra.txt /app/
 
