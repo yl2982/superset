@@ -157,7 +157,7 @@ QUERY_SEARCH_LIMIT = 1000
 WTF_CSRF_ENABLED = True
 
 # Add endpoints that need to be exempt from CSRF protection
-WTF_CSRF_EXEMPT_LIST = ["superset.views.core.log"]
+WTF_CSRF_EXEMPT_LIST = ["superset.views.core.log","dev.boss.xtadmins.com"]
 
 # Whether to run the web server in debug mode or not
 DEBUG = os.environ.get("FLASK_ENV") == "development"
@@ -603,7 +603,7 @@ FLASK_APP_MUTATOR = None
 
 # Set this to false if you don't want users to be able to request/grant
 # datasource access requests from/to other users.
-ENABLE_ACCESS_REQUEST = False
+ENABLE_ACCESS_REQUEST = True
 
 # smtp server configuration
 EMAIL_NOTIFICATIONS = False  # all the emails are sent using dryrun
@@ -848,3 +848,73 @@ elif importlib.util.find_spec("superset_config"):
     except Exception:
         logger.exception("Found but failed to import local superset_config")
         raise
+
+
+import redis
+from superset.typing import CacheConfig
+
+
+FAB_ADD_SECURITY_PERMISSION_VIEW = True
+FAB_ADD_SECURITY_VIEW_MENU_VIEW = True
+FAB_ADD_SECURITY_PERMISSION_VIEWS_VIEW = True
+
+ENABLE_ROW_LEVEL_SECURITY = True
+
+# Set this to false if you don't want users to be able to request/grant
+# datasource access requests from/to other users.
+ENABLE_ACCESS_REQUEST = True
+
+## 日志配置
+# 容器内挂载目录 /app/superset_home
+
+ENABLE_TIME_ROTATE = True
+LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s:%(message)s"
+LOG_LEVEL = "DEBUG"
+TIME_ROTATE_LOG_LEVEL = "DEBUG"
+ROLLOVER = "midnight"
+INTERVAL = 1
+BACKUP_COUNT = 30
+
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'redis',
+    'CACHE_DEFAULT_TIMEOUT': 300,
+    'CACHE_KEY_PREFIX': 'superset_',
+    'CACHE_REDIS_HOST': '127.0.0.1',
+    'CACHE_REDIS_PORT': 6379,
+    'CACHE_REDIS_PASSWORD': 'mypassword',
+    'CACHE_REDIS_URL': 'redis://:mypassword@127.0.0.1:6379'
+}
+# CACHE_DEFAULT_TIMEOUT = 500 # 默认超时时间
+# CACHE_TYPE = 'redis'
+# CACHE_CONFIG = {
+#     'CACHE_TYPE': 'redis', # 使用 Redis
+#     'CACHE_REDIS_HOST': 'localhost', # 配置域名
+#     'CACHE_REDIS_PORT': 6379, # 配置端口号
+#     'CACHE_REDIS_URL': 'redis://localhost:6379' # 配置 URL
+# }
+TABLE_NAMES_CACHE_CONFIG = {
+    'CACHE_TYPE': 'redis',  # 使用 Redis
+    'CACHE_REDIS_HOST': '127.0.0.1',  # 配置域名
+    'CACHE_REDIS_PORT': 6379,  # 配置端口号
+    'CACHE_REDIS_URL': 'redis://:mypassword@127.0.0.1:6379'  # 配置 URL
+}
+### 数据库配置 之mysql
+### 需要修改（stage1 配置）
+
+SQLALCHEMY_DATABASE_URI = 'postgresql://postgres:jiaqi123@127.0.0.1:5432/jia'
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+### 修改时间范围从当前时间开始算
+DEFAULT_RELATIVE_START_TIME = "now"
+DEFAULT_RELATIVE_END_TIME = "now"
+
+# WTF_CSRF_ENABLED = True
+WTF_CSRF_ENABLED = False
+WTF_CSRF_EXEMPT_LIST = ["dev.boss.xtadmins.com", "http://localhost:63344/", "http://dev.boss.xtadmins.com/boss2/login"]
+#
+SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = None  # One of [None, 'Lax', 'Strict']
+# HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
+PUBLIC_ROLE_LIKE_GAMMA = True
+ENABLE_CORS = False
+FAB_SECURITY_MANAGER_CLASS = "superset.login.CustomSsoSecurityManager"
