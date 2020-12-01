@@ -14,7 +14,7 @@ while [ $# -gt 0 ]; do
     exit
     ;;
   -base)
-    buildBase=yes
+    buildBase= true
     shift
     ;;
 
