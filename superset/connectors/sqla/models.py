@@ -877,6 +877,8 @@ class SqlaTable(Model, BaseDatasource):
                         where_clause_and.append(col_obj.get_sqla_col() != None)
 
         where_clause_and += self._get_sqla_row_level_filters(template_processor)
+
+        logger.info("rls {}".format("".join(map(str, where_clause_and))))
         if extras:
             where = extras.get("where")
             if where:

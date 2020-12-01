@@ -439,6 +439,7 @@ class BaseViz:
                 logger.info("Serving from cache")
 
         if query_obj and not is_loaded:
+            logger.info("loading for database")
             try:
                 df = self.get_df(query_obj)
                 if self.status != utils.QueryStatus.FAILED:

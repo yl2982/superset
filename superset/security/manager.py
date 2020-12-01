@@ -917,11 +917,13 @@ class SupersetSecurityManager(SecurityManager):
                 .filter(assoc_user_role.c.user_id == g.user.id)
                 .subquery()
             )
+            logger.info("user_roles {}".format(user_roles))
             filter_roles = (
-                db.session.query(RLSFilterRoles.c.id)
+                db.session.query(RLSFilterRoles.c.rls_filter_id)
                 .filter(RLSFilterRoles.c.role_id.in_(user_roles))
                 .subquery()
             )
+            logger.info("filter_roles {}".format(filter_roles))
             query = (
                 db.session.query(
                     RowLevelSecurityFilter.id, RowLevelSecurityFilter.clause
@@ -929,7 +931,10 @@ class SupersetSecurityManager(SecurityManager):
                 .filter(RowLevelSecurityFilter.table_id == table.id)
                 .filter(RowLevelSecurityFilter.id.in_(filter_roles))
             )
-            return query.all()
+            result = query.all()
+            logger.info("get_rls_filters {}".format("".join(map(str, result))))
+            return result
+
         return []
 
     def get_rls_ids(self, table: "BaseDatasource") -> List[int]:
