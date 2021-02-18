@@ -28,10 +28,11 @@ import Button from 'src/components/Button';
 import { LineEditableTabs } from 'src/common/components/Tabs';
 import { usePrevious } from 'src/common/hooks/usePrevious';
 import ErrorBoundary from 'src/components/ErrorBoundary';
-import { useFilterConfigMap, useFilterConfiguration } from './state';
+import { useFilterConfigMap, useFilterConfiguration } from '../state';
 import FilterConfigForm from './FilterConfigForm';
-import { FilterConfiguration, NativeFiltersForm } from './types';
+import { NativeFiltersForm } from './types';
 import { CancelConfirmationAlert } from './CancelConfirmationAlert';
+import { FilterConfiguration } from '../types';
 
 // how long to show the "undo" button when removing a filter
 const REMOVAL_DELAY_SECS = 5;
@@ -53,7 +54,7 @@ const StyledForm = styled(Form)`
 const StyledSpan = styled.span`
   cursor: pointer;
   color: ${({ theme }) => theme.colors.primary.dark1};
-  &: hover {
+  &:hover {
     color: ${({ theme }) => theme.colors.primary.dark2};
   }
 `;
@@ -399,28 +400,28 @@ export function FilterConfigModal({
         const formInputs = values.filters[id];
         // if user didn't open a filter, return the original config
         if (!formInputs) return filterConfigMap[id];
+        let target = {};
+        if (formInputs.dataset && formInputs.column) {
+          target = {
+            datasetId: formInputs.dataset.value,
+            column: {
+              name: formInputs.column,
+            },
+          };
+        }
         return {
           id,
+          controlValues: formInputs.controlValues,
           name: formInputs.name,
           filterType: formInputs.filterType,
           // for now there will only ever be one target
-          targets: [
-            {
-              datasetId: formInputs.dataset.value,
-              column: {
-                name: formInputs.column,
-              },
-            },
-          ],
+          targets: [target],
           defaultValue: formInputs.defaultValue || null,
           cascadeParentIds: formInputs.parentFilter
             ? [formInputs.parentFilter.value]
             : [],
           scope: formInputs.scope,
-          inverseSelection: !!formInputs.inverseSelection,
-          isInstant: !!formInputs.isInstant,
-          allowsMultipleValues: !!formInputs.allowsMultipleValues,
-          isRequired: !!formInputs.isRequired,
+          isInstant: formInputs.isInstant,
         };
       });
 
@@ -483,10 +484,20 @@ export function FilterConfigModal({
     }
 
     return [
-      <Button key="cancel" buttonStyle="secondary" onClick={handleCancel}>
+      <Button
+        key="cancel"
+        buttonStyle="secondary"
+        data-test="native-filter-modal-cancel-button"
+        onClick={handleCancel}
+      >
         {t('Cancel')}
       </Button>,
-      <Button key="submit" buttonStyle="primary" onClick={onOk}>
+      <Button
+        key="submit"
+        buttonStyle="primary"
+        onClick={onOk}
+        data-test="native-filter-modal-save-button"
+      >
         {t('Save')}
       </Button>,
     ];
@@ -495,6 +506,7 @@ export function FilterConfigModal({
   return (
     <StyledModal
       visible={isOpen}
+      maskClosable={false}
       title={t('Filter configuration and scoping')}
       width="55%"
       destroyOnClose
@@ -530,7 +542,8 @@ export function FilterConfigModal({
               onEdit={onTabEdit}
               addIcon={
                 <StyledAddFilterBox>
-                  <PlusOutlined /> <span>{t('Add filter')}</span>
+                  <PlusOutlined />{' '}
+                  <span data-test="add-filter-button">{t('Add filter')}</span>
                 </StyledAddFilterBox>
               }
             >
@@ -548,6 +561,7 @@ export function FilterConfigModal({
                       {removedFilters[id] && (
                         <StyledSpan
                           role="button"
+                          data-test="undo-button"
                           tabIndex={0}
                           onClick={() => restoreFilter(id)}
                         >
