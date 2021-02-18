@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+// import WaterMark from 'watermark-component-for-react'; // watermark package
 import { createStore, compose, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunkMiddleware from 'redux-thunk';
@@ -47,6 +48,10 @@ setupApp();
 
 const appContainer = document.getElementById('app');
 const bootstrapData = JSON.parse(appContainer.getAttribute('data-bootstrap'));
+
+// const container = document.getElementById('app');
+// const bootstrap = JSON.parse(container?.getAttribute('data-bootstrap') ?? '{}');
+// const user = { ...bootstrap.user };
 
 initFeatureFlags(bootstrapData.common.feature_flags);
 
@@ -107,6 +112,8 @@ if (sqlLabMenu) {
     sqlLabMenu.setAttribute('class', `${classes} active`);
   }
 }
+
+// const content = '内部文件,请勿外传';
 
 const Application = () => (
   <Provider store={store}>

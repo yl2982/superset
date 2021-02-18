@@ -59,6 +59,8 @@ const MENU_KEYS = {
   DOWNLOAD_AS_IMAGE: 'download_as_image',
 };
 
+const WATERMARK_CONTENT = '内部文件,请勿外传';
+
 const CopyButtonViewQuery = styled(CopyButton)`
   && {
     margin: 0 0 ${({ theme }) => theme.gridUnit}px;
@@ -116,6 +118,7 @@ export const DisplayQueryButton = props => {
           '.chart-container',
           // eslint-disable-next-line camelcase
           slice?.slice_name ?? t('New chart'),
+          WATERMARK_CONTENT,
           {
             height: parseInt(chartHeight, 10),
           },

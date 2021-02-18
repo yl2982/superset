@@ -17,6 +17,7 @@
  * under the License.
  */
 import React from 'react';
+// import WaterMark from 'watermark-component-for-react'; // watermark package
 import { hot } from 'react-hot-loader/root';
 import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
@@ -33,6 +34,10 @@ import { theme } from '../preamble';
 
 setupApp();
 setupPlugins();
+
+// const container = document.getElementById('app');
+// const bootstrap = JSON.parse(container?.getAttribute('data-bootstrap') ?? '{}');
+// const user = { ...bootstrap.user };
 
 const App = ({ store }) => (
   <Provider store={store}>

@@ -19,6 +19,7 @@
 /* eslint camelcase: 0 */
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import WaterMark from 'watermark-component-for-react'; // watermark package
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { styled, t, supersetTheme, css } from '@superset-ui/core';
@@ -132,6 +133,10 @@ const Styles = styled.div`
     color: ${({ theme }) => theme.colors.primary.base};
   }
 `;
+
+const container = document.getElementById('app');
+const bootstrap = JSON.parse(container?.getAttribute('data-bootstrap') ?? '{}');
+const user = { ...bootstrap.user };
 
 const getWindowSize = () => ({
   height: window.innerHeight,
@@ -366,15 +371,17 @@ function ExploreViewContainer(props) {
 
   function renderChartContainer() {
     return (
-      <ExploreChartPanel
-        width={width}
-        height={height}
-        {...props}
-        errorMessage={renderErrorMessage()}
-        refreshOverlayVisible={chartIsStale}
-        addHistory={addHistory}
-        onQuery={onQuery}
-      />
+      <WaterMark content={user.username}>
+        <ExploreChartPanel
+          width={width}
+          height={height}
+          {...props}
+          errorMessage={renderErrorMessage()}
+          refreshOverlayVisible={chartIsStale}
+          addHistory={addHistory}
+          onQuery={onQuery}
+        />
+      </WaterMark>
     );
   }
 

@@ -670,6 +670,7 @@ class Superset(BaseSupersetView):  # pylint: disable=too-many-public-methods
         self, datasource_type: Optional[str] = None, datasource_id: Optional[int] = None
     ) -> FlaskResponse:
         user_id = g.user.get_id() if g.user else None
+        user_name = g.user.username if g.user else None
         form_data, slc = get_form_data(use_slice_data=True)
 
         # Flash the SIP-15 message if the slice is owned by the current user and has not
@@ -794,6 +795,7 @@ class Superset(BaseSupersetView):  # pylint: disable=too-many-public-methods
             "metrics": [],
         }
         bootstrap_data = {
+            "user": bootstrap_user_data(g.user),
             "can_add": slice_add_perm,
             "can_download": slice_download_perm,
             "can_overwrite": slice_overwrite_perm,
@@ -1861,6 +1863,7 @@ class Superset(BaseSupersetView):  # pylint: disable=too-many-public-methods
 
         bootstrap_data = {
             "user_id": g.user.get_id(),
+            "user": bootstrap_user_data(g.user),
             "common": common_bootstrap_payload(),
             "editMode": edit_mode,
             "urlParams": url_params,

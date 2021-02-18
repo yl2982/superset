@@ -43,12 +43,14 @@ const generateFileStem = (description: string, date = new Date()) =>
  * @param selector css selector of the parent element which should be turned into image
  * @param description name or a short description of what is being printed.
  *   Value will be normalized, and a date as well as a file extension will be added.
- * @param backgroundColor background color to apply to screenshot document
+ * @param domToImageOptions
+ * @param text
  * @returns event handler
  */
 export default function downloadAsImage(
   selector: string,
   description: string,
+  text: string,
   domToImageOptions: Options = {},
 ) {
   return (event: SyntheticEvent) => {
@@ -61,11 +63,15 @@ export default function downloadAsImage(
     }
 
     return domToImage
-      .toJpeg(elementToPrint, {
-        quality: 0.95,
-        bgcolor: GRAY_BACKGROUND_COLOR,
-        ...domToImageOptions,
-      })
+      .toJpeg(
+        elementToPrint,
+        {
+          quality: 0.95,
+          bgcolor: GRAY_BACKGROUND_COLOR,
+          ...domToImageOptions,
+        },
+        text,
+      )
       .then(dataUrl => {
         const link = document.createElement('a');
         link.download = `${generateFileStem(description)}.jpg`;

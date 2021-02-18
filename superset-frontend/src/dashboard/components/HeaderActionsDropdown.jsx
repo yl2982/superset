@@ -89,6 +89,8 @@ const DropdownButton = styled.div`
 
 const SCREENSHOT_NODE_SELECTOR = '.dashboard';
 
+const WATERMARK_CONTENT = '内部文件,请勿外传';
+
 class HeaderActionsDropdown extends React.PureComponent {
   static discardChanges() {
     window.location.reload();
@@ -156,6 +158,7 @@ class HeaderActionsDropdown extends React.PureComponent {
         downloadAsImage(
           SCREENSHOT_NODE_SELECTOR,
           this.props.dashboardTitle,
+          WATERMARK_CONTENT,
         )(domEvent).then(() => {
           menu.style.visibility = 'visible';
         });

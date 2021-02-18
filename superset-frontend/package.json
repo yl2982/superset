@@ -27,7 +27,8 @@
     "check-translation": "prettier --check ../superset/translations/**/LC_MESSAGES/*.json",
     "clean-translation": "prettier --write ../superset/translations/**/LC_MESSAGES/*.json",
     "storybook": "NODE_ENV=development BABEL_ENV=development start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "postinstall": "patch-package"
   },
   "repository": {
     "type": "git",
@@ -172,7 +173,8 @@
     "rison": "^0.1.1",
     "shortid": "^2.2.6",
     "urijs": "^1.19.4",
-    "use-query-params": "^1.1.9"
+    "use-query-params": "^1.1.9",
+    "watermark-component-for-react": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
@@ -275,6 +277,7 @@
     "mini-css-extract-plugin": "^0.4.0",
     "node-fetch": "^2.6.1",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "patch-package": "^6.2.2",
     "po2json": "^0.4.5",
     "prettier": "^2.2.1",
     "react-test-renderer": "^16.9.0",

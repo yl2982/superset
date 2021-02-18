@@ -94,6 +94,8 @@ const RefreshTooltip = styled.div`
 
 const SCREENSHOT_NODE_SELECTOR = '.dashboard-component-chart-holder';
 
+const WATERMARK_CONTENT = '内部文件,请勿外传';
+
 const VerticalDotsTrigger = () => (
   <VerticalDotsContainer>
     <span className="dot" />
@@ -156,6 +158,7 @@ class SliceHeaderControls extends React.PureComponent {
         downloadAsImage(
           SCREENSHOT_NODE_SELECTOR,
           this.props.slice.slice_name,
+          WATERMARK_CONTENT,
         )(domEvent).then(() => {
           menu.style.visibility = 'visible';
         });

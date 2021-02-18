@@ -1,0 +1,81 @@
+diff --git a/node_modules/dom-to-image/src/dom-to-image.js b/node_modules/dom-to-image/src/dom-to-image.js
+index 27201ac..53584e1 100644
+--- a/node_modules/dom-to-image/src/dom-to-image.js
++++ b/node_modules/dom-to-image/src/dom-to-image.js
+@@ -87,8 +87,8 @@
+      * @param {Object} options - Rendering options, @see {@link toSvg}
+      * @return {Promise} - A promise that is fulfilled with a Uint8Array containing RGBA pixel data.
+      * */
+-    function toPixelData(node, options) {
+-        return draw(node, options || {})
++    function toPixelData(node, options, text) {
++        return draw(node, options || {}, text)
+             .then(function (canvas) {
+                 return canvas.getContext('2d').getImageData(
+                     0,
+@@ -104,8 +104,8 @@
+      * @param {Object} options - Rendering options, @see {@link toSvg}
+      * @return {Promise} - A promise that is fulfilled with a PNG image data URL
+      * */
+-    function toPng(node, options) {
+-        return draw(node, options || {})
++    function toPng(node, options, text) {
++        return draw(node, options || {}, text)
+             .then(function (canvas) {
+                 return canvas.toDataURL();
+             });
+@@ -116,9 +116,9 @@
+      * @param {Object} options - Rendering options, @see {@link toSvg}
+      * @return {Promise} - A promise that is fulfilled with a JPEG image data URL
+      * */
+-    function toJpeg(node, options) {
++    function toJpeg(node, options, text) {
+         options = options || {};
+-        return draw(node, options)
++        return draw(node, options, text)
+             .then(function (canvas) {
+                 return canvas.toDataURL('image/jpeg', options.quality || 1.0);
+             });
+@@ -129,8 +129,8 @@
+      * @param {Object} options - Rendering options, @see {@link toSvg}
+      * @return {Promise} - A promise that is fulfilled with a PNG image blob
+      * */
+-    function toBlob(node, options) {
+-        return draw(node, options || {})
++    function toBlob(node, options, text) {
++        return draw(node, options || {}, text)
+             .then(util.canvasToBlob);
+     }
+ 
+@@ -148,16 +148,21 @@
+             domtoimage.impl.options.cacheBust = options.cacheBust;
+         }
+     }
+-
+-    function draw(domNode, options) {
+-        return toSvg(domNode, options)
+-            .then(util.makeImage)
+-            .then(util.delay(100))
+-            .then(function (image) {
+-                var canvas = newCanvas(domNode);
+-                canvas.getContext('2d').drawImage(image, 0, 0);
+-                return canvas;
+-            });
++    // add watermark
++    function draw(domNode, options, text) {
++      return toSvg(domNode, options)
++        .then(util.makeImage)
++        .then(util.delay(100))
++        .then(function (image, text) {
++          var canvas = newCanvas(domNode);
++          console.log("CANVAS DRAWED");
++          canvas.getContext('2d').drawImage(image, 0, 0);
++          canvas.getContext('2d').font = '30px Microsoft Yahei';
++          for(var i=canvas.height/10; i<canvas.height; i+=canvas.height/10) {
++            canvas.getContext('2d').fillText(text, canvas.width / 4, i);
++          }
++          return canvas;
++        })
+ 
+         function newCanvas(domNode) {
+             var canvas = document.createElement('canvas');

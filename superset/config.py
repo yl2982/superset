@@ -150,10 +150,10 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 SECRET_KEY = "\2\1thisismyscretkey\1\2\\e\\y\\y\\h"
 
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(DATA_DIR, "superset.db")
+# SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(DATA_DIR, "superset.db")
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
-# SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
-
+SQLALCHEMY_DATABASE_URI = 'postgresql://@localhost:5432/xtransfer'
+# jdbc:postgresql://localhost:5432/postgres
 # In order to hook up a custom password store for all SQLACHEMY connections
 # implement a function that takes a single argument of type 'sqla.engine.url',
 # returns a password and set SQLALCHEMY_CUSTOM_PASSWORD_STORE.
@@ -423,6 +423,7 @@ EXTRA_SEQUENTIAL_COLOR_SCHEMES: List[Dict[str, Any]] = []
 # Thumbnail config (behind feature flag)
 # ---------------------------------------------------
 THUMBNAIL_SELENIUM_USER = "admin"
+
 THUMBNAIL_CACHE_CONFIG: CacheConfig = {
     "CACHE_TYPE": "null",
     "CACHE_NO_NULL_WARNING": True,
@@ -885,7 +886,7 @@ ENABLE_SCHEDULED_EMAIL_REPORTS = False
 # Enable / disable Alerts, where users can define custom SQL that
 # will send emails with screenshots of charts or dashboards periodically
 # if it meets the criteria
-ENABLE_ALERTS = False
+ENABLE_ALERTS = True
 
 # Used for Alerts/Reports (Feature flask ALERT_REPORTS) to set the size for the
 # sliding cron window size, should be synced with the celery beat config minus 1 second
@@ -1083,6 +1084,7 @@ DATASET_HEALTH_CHECK = None
 # Don't add config values below this line since local configs won't be
 # able to override them.
 if CONFIG_PATH_ENV_VAR in os.environ:
+    print("SUCCESS")
     # Explicitly import config module that is not necessarily in pythonpath; useful
     # for case where app is being executed via pex.
     try:
