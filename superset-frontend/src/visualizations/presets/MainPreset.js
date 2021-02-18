@@ -65,6 +65,8 @@ import {
 } from 'src/filters/components/';
 import FilterBoxChartPlugin from '../FilterBox/FilterBoxChartPlugin';
 import TimeTableChartPlugin from '../TimeTable/TimeTableChartPlugin';
+import {FunnelPlugin} from "../Echart";
+
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -105,6 +107,7 @@ export default class MainPreset extends Preset {
         new TableChartPlugin().configure({ key: 'table' }),
         new TimePivotChartPlugin().configure({ key: 'time_pivot' }),
         new TimeTableChartPlugin().configure({ key: 'time_table' }),
+        new FunnelPlugin().configure({ key: 'echart_funnel' }),
         new TreemapChartPlugin().configure({ key: 'treemap' }),
         new WordCloudChartPlugin().configure({ key: 'word_cloud' }),
         new WorldMapChartPlugin().configure({ key: 'world_map' }),

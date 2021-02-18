@@ -20,6 +20,8 @@ from flask_babel import gettext as _
 
 from superset.errors import ErrorLevel, SupersetError, SupersetErrorType
 
+from flask_babel import gettext as _
+
 
 class SupersetException(Exception):
     status = 500

@@ -46,6 +46,10 @@ from superset.utils.core import is_test
 from superset.utils.log import DBEventLogger
 from superset.utils.logging_configurator import DefaultLoggingConfigurator
 
+from superset.login import CustomSsoSecurityManager
+
+CUSTOM_SECURITY_MANAGER = CustomSsoSecurityManager
+
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
