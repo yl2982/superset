@@ -1,5 +1,3 @@
-ignore:
-  - "superset/migrations/versions/*.py"
 coverage:
   status:
     project:

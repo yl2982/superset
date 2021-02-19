@@ -80,78 +80,19 @@ const App = () => (
                 ReactRouterRoute={Route}
                 stringifyOptions={{ encode: false }}
               >
-                <Menu data={menu} />
+                <Menu data={menu} isFrontendRoute={isFrontendRoute} />
                 <Switch>
-                  <Route path="/superset/welcome/">
-                    <ErrorBoundary>
-                      <Welcome user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/dashboard/list/">
-                    <ErrorBoundary>
-                      <DashboardList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/chart/list/">
-                    <ErrorBoundary>
-                      <ChartList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/tablemodelview/list/">
-                    <ErrorBoundary>
-                      <DatasetList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/databaseview/list/">
-                    <ErrorBoundary>
-                      <DatabaseList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/savedqueryview/list/">
-                    <ErrorBoundary>
-                      <SavedQueryList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/csstemplatemodelview/list/">
-                    <ErrorBoundary>
-                      <CssTemplatesList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/annotationlayermodelview/list/">
-                    <ErrorBoundary>
-                      <AnnotationLayersList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/annotationmodelview/:annotationLayerId/annotation/">
-                    <ErrorBoundary>
-                      <AnnotationList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/superset/sqllab/history/">
-                    <ErrorBoundary>
-                      <QueryList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/alert/list/">
-                    <ErrorBoundary>
-                      <AlertList user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/report/list/">
-                    <ErrorBoundary>
-                      <AlertList user={user} isReportEnabled />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/alert/:alertId/log">
-                    <ErrorBoundary>
-                      <ExecutionLog user={user} />
-                    </ErrorBoundary>
-                  </Route>
-                  <Route path="/report/:alertId/log">
-                    <ErrorBoundary>
-                      <ExecutionLog user={user} isReportEnabled />
-                    </ErrorBoundary>
-                  </Route>
+                  {routes.map(
+                    ({ path, Component, props = {}, Fallback = Loading }) => (
+                      <Route path={path} key={path}>
+                        <Suspense fallback={<Fallback />}>
+                          <ErrorBoundary>
+                            <Component user={user} {...props} />
+                          </ErrorBoundary>
+                        </Suspense>
+                      </Route>
+                    ),
+                  )}
                 </Switch>
                 <ToastPresenter />
               </QueryParamProvider>
