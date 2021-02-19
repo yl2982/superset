@@ -16,37 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { styled } from '@superset-ui/core';
+import { Behavior, ChartMetadata, ChartPlugin, t } from '@superset-ui/core';
+import controlPanel from './controlPanel';
+import transformProps from './transformProps';
+import thumbnail from './images/thumbnail.png';
 
-interface Props {
-  position?: string;
-}
+export default class TimeFilterPlugin extends ChartPlugin {
+  constructor() {
+    const metadata = new ChartMetadata({
+      name: t('Time filter'),
+      description: 'Custom time filter plugin',
+      behaviors: [Behavior.CROSS_FILTER, Behavior.NATIVE_FILTER],
+      thumbnail,
+      datasourceCount: 0,
+    });
 
-const LoaderImg = styled.img`
-  z-index: 99;
-  width: 50px;
-  position: relative;
-  margin: 10px;
-  &.inline {
-    margin: 0px;
-    width: 30px;
+    super({
+      controlPanel,
+      loadChart: () => import('./TimeFilterPlugin'),
+      metadata,
+      transformProps,
+    });
   }
-  &.floating {
-    padding: 0;
-    margin: 0;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-`;
-export default function Loading({ position = 'floating' }: Props) {
-  return (
-    <LoaderImg
-      className={`loading ${position}`}
-      alt="Loading..."
-      src="/static/assets/images/loading.gif"
-    />
-  );
 }

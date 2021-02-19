@@ -16,34 +16,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  QueryFormData,
-  styled,
-  SuperChart,
-  t,
-  ExtraFormData,
-} from '@superset-ui/core';
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { styled, t, tn, ExtraFormData } from '@superset-ui/core';
+import React, { useState, useEffect, useMemo, ChangeEvent } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import cx from 'classnames';
 import Button from 'src/components/Button';
 import Icon from 'src/components/Icon';
-import { getChartDataRequest } from 'src/chart/chartAction';
-import { areObjectsEqual } from 'src/reduxUtils';
-import Loading from 'src/components/Loading';
-import BasicErrorAlert from 'src/components/ErrorMessage/BasicErrorAlert';
+import { CurrentFilterState } from 'src/dashboard/reducers/types';
+import { Input, Select } from 'src/common/components';
+import { FeatureFlag, isFeatureEnabled } from 'src/featureFlags';
+import {
+  saveFilterSets,
+  setFiltersState,
+} from 'src/dashboard/actions/nativeFilters';
+import { SelectValue } from 'antd/lib/select';
 import FilterConfigurationLink from './FilterConfigurationLink';
 import {
-  useCascadingFilters,
-  useFilterConfiguration,
   useFilters,
-  useFilterState,
+  useFilterSets,
+  useFiltersState,
   useSetExtraFormData,
 } from './state';
-import { Filter, CascadeFilter, CurrentFilterState } from './types';
+import { useFilterConfiguration } from '../state';
+import { Filter } from '../types';
 import {
   buildCascadeFiltersTree,
-  getFormData,
+  generateFiltersSetId,
   mapParentFiltersToChildren,
 } from './utils';
 import CascadePopover from './CascadePopover';
@@ -55,10 +53,6 @@ const BarWrapper = styled.div`
   &.open {
     width: ${barWidth}; // arbitrary...
   }
-`;
-
-const FilterItem = styled.div`
-  padding-bottom: 10px;
 `;
 
 const Bar = styled.div`
@@ -84,6 +78,17 @@ const Bar = styled.div`
       transform: translateX(0);
       transition-delay: ${({ theme }) => theme.transitionTiming * 2}s;
     } */
+  }
+`;
+
+const StyledTitle = styled.h4`
+  width: 100%;
+  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  color: ${({ theme }) => theme.colors.grayscale.dark1};
+  margin: 0;
+  overflow-wrap: break-word;
+  & > .ant-select {
+    width: 100%;
   }
 `;
 
@@ -124,6 +129,15 @@ const StyledCollapseIcon = styled(Icon)`
   margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
 `;
 
+const FilterSet = styled.div`
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  grid-template-columns: 1fr;
+  grid-gap: 10px;
+  padding-top: 10px;
+`;
+
 const TitleArea = styled.h4`
   display: flex;
   flex-direction: row;
@@ -157,229 +171,11 @@ const FilterControls = styled.div`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
 `;
 
-const StyledCascadeChildrenList = styled.ul`
-  list-style-type: none;
-  & > * {
-    list-style-type: none;
-  }
-`;
-
-const StyledFilterControlTitle = styled.h4`
-  width: 100%;
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  color: ${({ theme }) => theme.colors.grayscale.dark1};
-  margin: 0;
-  overflow-wrap: break-word;
-`;
-
-const StyledFilterControlTitleBox = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.gridUnit}px;
-`;
-
-const StyledFilterControlContainer = styled.div`
-  width: 100%;
-`;
-
-const StyledFilterControlBox = styled.div`
-  display: flex;
-`;
-
-const StyledCaretIcon = styled(Icon)`
-  margin-top: ${({ theme }) => -theme.gridUnit}px;
-`;
-
-const StyledLoadingBox = styled.div`
-  position: relative;
-  height: ${({ theme }) => theme.gridUnit * 8}px;
-  margin-bottom: ${({ theme }) => theme.gridUnit * 6}px;
-`;
-
-interface FilterProps {
-  filter: Filter;
-  icon?: React.ReactElement;
-  directPathToChild?: string[];
-  onFilterSelectionChange: (
-    filter: Filter,
-    extraFormData: ExtraFormData,
-    currentState: CurrentFilterState,
-  ) => void;
-}
-
 interface FiltersBarProps {
   filtersOpen: boolean;
   toggleFiltersBar: any;
   directPathToChild?: string[];
 }
-
-const FilterValue: React.FC<FilterProps> = ({
-  filter,
-  directPathToChild,
-  onFilterSelectionChange,
-}) => {
-  const {
-    id,
-    allowsMultipleValues,
-    inverseSelection,
-    targets,
-    defaultValue,
-    filterType,
-  } = filter;
-  const cascadingFilters = useCascadingFilters(id);
-  const filterState = useFilterState(id);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [state, setState] = useState([]);
-  const [error, setError] = useState<boolean>(false);
-  const [formData, setFormData] = useState<Partial<QueryFormData>>({});
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [target] = targets;
-  const { datasetId = 18, column } = target;
-  const { name: groupby } = column;
-  const currentValue = filterState.currentState?.value;
-  useEffect(() => {
-    const newFormData = getFormData({
-      datasetId,
-      cascadingFilters,
-      groupby,
-      allowsMultipleValues,
-      defaultValue,
-      currentValue,
-      inverseSelection,
-    });
-    if (!areObjectsEqual(formData || {}, newFormData)) {
-      setFormData(newFormData);
-      getChartDataRequest({
-        formData: newFormData,
-        force: false,
-        requestParams: { dashboardId: 0 },
-      })
-        .then(response => {
-          setState(response.result);
-          setError(false);
-          setLoading(false);
-        })
-        .catch(() => {
-          setError(true);
-          setLoading(false);
-        });
-    }
-  }, [cascadingFilters, datasetId, groupby, defaultValue, currentValue]);
-
-  useEffect(() => {
-    if (directPathToChild?.[0] === filter.id) {
-      // wait for Cascade Popover to open
-      const timeout = setTimeout(() => {
-        inputRef?.current?.focus();
-      }, 200);
-      return () => clearTimeout(timeout);
-    }
-    return undefined;
-  }, [inputRef, directPathToChild, filter.id]);
-
-  const setExtraFormData = ({
-    extraFormData,
-    currentState,
-  }: {
-    extraFormData: ExtraFormData;
-    currentState: CurrentFilterState;
-  }) => onFilterSelectionChange(filter, extraFormData, currentState);
-
-  if (loading) {
-    return (
-      <StyledLoadingBox>
-        <Loading />
-      </StyledLoadingBox>
-    );
-  }
-
-  if (error) {
-    return (
-      <BasicErrorAlert
-        title={t('Cannot load filter')}
-        body={t('Check configuration')}
-        level="error"
-      />
-    );
-  }
-
-  return (
-    <FilterItem>
-      <SuperChart
-        height={20}
-        width={220}
-        formData={formData}
-        queriesData={state}
-        chartType={filterType}
-        // @ts-ignore (update superset-ui)
-        hooks={{ setExtraFormData }}
-      />
-    </FilterItem>
-  );
-};
-
-export const FilterControl: React.FC<FilterProps> = ({
-  filter,
-  icon,
-  onFilterSelectionChange,
-  directPathToChild,
-}) => {
-  const { name = '<undefined>' } = filter;
-  return (
-    <StyledFilterControlContainer>
-      <StyledFilterControlTitleBox>
-        <StyledFilterControlTitle>{name}</StyledFilterControlTitle>
-        <div>{icon}</div>
-      </StyledFilterControlTitleBox>
-      <FilterValue
-        filter={filter}
-        directPathToChild={directPathToChild}
-        onFilterSelectionChange={onFilterSelectionChange}
-      />
-    </StyledFilterControlContainer>
-  );
-};
-
-interface CascadeFilterControlProps {
-  filter: CascadeFilter;
-  directPathToChild?: string[];
-  onFilterSelectionChange: (
-    filter: Filter,
-    extraFormData: ExtraFormData,
-    currentState: CurrentFilterState,
-  ) => void;
-}
-
-export const CascadeFilterControl: React.FC<CascadeFilterControlProps> = ({
-  filter,
-  directPathToChild,
-  onFilterSelectionChange,
-}) => (
-  <>
-    <StyledFilterControlBox>
-      <StyledCaretIcon name="caret-down" />
-      <FilterControl
-        filter={filter}
-        directPathToChild={directPathToChild}
-        onFilterSelectionChange={onFilterSelectionChange}
-      />
-    </StyledFilterControlBox>
-
-    <StyledCascadeChildrenList>
-      {filter.cascadeChildren?.map(childFilter => (
-        <li key={childFilter.id}>
-          <CascadeFilterControl
-            filter={childFilter}
-            directPathToChild={directPathToChild}
-            onFilterSelectionChange={onFilterSelectionChange}
-          />
-        </li>
-      ))}
-    </StyledCascadeChildrenList>
-  </>
-);
 
 const FilterBar: React.FC<FiltersBarProps> = ({
   filtersOpen,
@@ -392,9 +188,13 @@ const FilterBar: React.FC<FiltersBarProps> = ({
       currentState: CurrentFilterState;
     };
   }>({});
+  const dispatch = useDispatch();
   const setExtraFormData = useSetExtraFormData();
+  const filtersState = useFiltersState();
+  const filterSets = useFilterSets();
   const filterConfigs = useFilterConfiguration();
   const filters = useFilters();
+  const [filtersSetName, setFiltersSetName] = useState('');
   const canEdit = useSelector<any, boolean>(
     ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
   );
@@ -424,17 +224,23 @@ const FilterBar: React.FC<FiltersBarProps> = ({
     extraFormData: ExtraFormData,
     currentState: CurrentFilterState,
   ) => {
-    setFilterData(prevFilterData => ({
-      ...prevFilterData,
-      [filter.id]: {
-        extraFormData,
-        currentState,
-      },
-    }));
+    let isInitialized = false;
+    setFilterData(prevFilterData => {
+      if (filter.id in prevFilterData) {
+        isInitialized = true;
+      }
+      return {
+        ...prevFilterData,
+        [filter.id]: {
+          extraFormData,
+          currentState,
+        },
+      };
+    });
 
     const children = cascadeChildren[filter.id] || [];
-    // force instant updating for parent filters
-    if (filter.isInstant || children.length > 0) {
+    // force instant updating on initialization or for parent filters
+    if (!isInitialized || filter.isInstant || children.length > 0) {
       setExtraFormData(filter.id, extraFormData, currentState);
     }
   };
@@ -452,6 +258,17 @@ const FilterBar: React.FC<FiltersBarProps> = ({
     });
   };
 
+  const handleSaveFilterSets = () => {
+    dispatch(
+      saveFilterSets(
+        filtersSetName.trim(),
+        generateFiltersSetId(),
+        filtersState,
+      ),
+    );
+    setFiltersSetName('');
+  };
+
   const handleResetAll = () => {
     filterConfigs.forEach(filter => {
       setExtraFormData(filter.id, filterData[filter.id]?.extraFormData, {
@@ -459,6 +276,10 @@ const FilterBar: React.FC<FiltersBarProps> = ({
         value: filters[filter.id]?.defaultValue,
       });
     });
+  };
+
+  const takeFiltersSet = (value: SelectValue) => {
+    dispatch(setFiltersState(filterSets[String(value)]?.filtersState));
   };
 
   return (
@@ -489,6 +310,7 @@ const FilterBar: React.FC<FiltersBarProps> = ({
             buttonStyle="secondary"
             buttonSize="small"
             onClick={handleResetAll}
+            data-test="filter-reset-button"
           >
             {t('Reset all')}
           </Button>
@@ -497,10 +319,55 @@ const FilterBar: React.FC<FiltersBarProps> = ({
             htmlType="submit"
             buttonSize="small"
             onClick={handleApply}
+            data-test="filter-apply-button"
           >
             {t('Apply')}
           </Button>
         </ActionButtons>
+        {isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS_SET) && (
+          <ActionButtons>
+            <FilterSet>
+              <StyledTitle>
+                <div>{t('Choose filters set')}</div>
+                <Select
+                  size="small"
+                  allowClear
+                  placeholder={tn(
+                    'Available %d sets',
+                    Object.keys(filterSets).length,
+                  )}
+                  onChange={takeFiltersSet}
+                >
+                  {Object.values(filterSets).map(({ name, id }) => (
+                    <Select.Option value={id}>{name}</Select.Option>
+                  ))}
+                </Select>
+              </StyledTitle>
+              <StyledTitle>
+                <div>{t('Name')}</div>
+                <Input
+                  size="small"
+                  placeholder={t('Enter filter set name')}
+                  value={filtersSetName}
+                  onChange={({
+                    target: { value },
+                  }: ChangeEvent<HTMLInputElement>) => {
+                    setFiltersSetName(value);
+                  }}
+                />
+              </StyledTitle>
+              <Button
+                buttonStyle="secondary"
+                buttonSize="small"
+                disabled={filtersSetName.trim() === ''}
+                onClick={handleSaveFilterSets}
+                data-test="filter-save-filters-set-button"
+              >
+                {t('Save Filters Set')}
+              </Button>
+            </FilterSet>
+          </ActionButtons>
+        )}
         <FilterControls>
           {cascadeFilters.map(filter => (
             <CascadePopover

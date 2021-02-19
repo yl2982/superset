@@ -104,6 +104,19 @@ const RETENTION_OPTIONS = [
 const DEFAULT_RETENTION = 90;
 const DEFAULT_WORKING_TIMEOUT = 3600;
 const DEFAULT_CRON_VALUE = '* * * * *'; // every minute
+const DEFAULT_ALERT = {
+  active: true,
+  crontab: DEFAULT_CRON_VALUE,
+  log_retention: DEFAULT_RETENTION,
+  working_timeout: DEFAULT_WORKING_TIMEOUT,
+  name: '',
+  owners: [],
+  recipients: [],
+  sql: '',
+  validator_config_json: {},
+  validator_type: '',
+  grace_period: undefined,
+};
 
 const StyledIcon = styled(Icon)`
   margin: auto ${({ theme }) => theme.gridUnit * 2}px auto 0;
@@ -177,8 +190,19 @@ const StyledSectionContainer = styled.div`
 `;
 
 const StyledSectionTitle = styled.div`
+  display: flex;
+  align-items: center;
   margin: ${({ theme }) => theme.gridUnit * 2}px auto
     ${({ theme }) => theme.gridUnit * 4}px auto;
+
+  h4 {
+    margin: 0;
+  }
+
+  .required {
+    margin-left: ${({ theme }) => theme.gridUnit}px;
+    color: ${({ theme }) => theme.colors.error.base};
+  }
 `;
 
 const StyledSwitchContainer = styled.div`
@@ -552,6 +576,8 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
     clearError();
     setIsHidden(true);
     onHide();
+    setCurrentAlert({ ...DEFAULT_ALERT });
+    setNotificationSettings([]);
   };
 
   const onSave = () => {
@@ -924,19 +950,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
       !isEditMode &&
       (!currentAlert || currentAlert.id || (isHidden && show))
     ) {
-      setCurrentAlert({
-        active: true,
-        crontab: DEFAULT_CRON_VALUE,
-        log_retention: DEFAULT_RETENTION,
-        working_timeout: DEFAULT_WORKING_TIMEOUT,
-        name: '',
-        owners: [],
-        recipients: [],
-        sql: '',
-        validator_config_json: {},
-        validator_type: '',
-      });
-
+      setCurrentAlert({ ...DEFAULT_ALERT });
       setNotificationSettings([]);
       setNotificationAddState('active');
     }
@@ -1213,6 +1227,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
                   ? t('Report schedule')
                   : t('Alert condition schedule')}
               </h4>
+              <span className="required">*</span>
             </StyledSectionTitle>
             <AlertReportCronScheduler
               value={
@@ -1270,7 +1285,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
                   <input
                     type="number"
                     name="grace_period"
-                    value={currentAlert ? currentAlert.grace_period : ''}
+                    value={currentAlert?.grace_period || ''}
                     placeholder={t('Time in seconds')}
                     onChange={onTextChange}
                   />
@@ -1282,6 +1297,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
           <div className="column message">
             <StyledSectionTitle>
               <h4>{t('Message content')}</h4>
+              <span className="required">*</span>
             </StyledSectionTitle>
             <div className="inline-container add-margin">
               <Radio.Group onChange={onContentTypeChange} value={contentType}>
@@ -1331,6 +1347,7 @@ const AlertReportModal: FunctionComponent<AlertReportModalProps> = ({
             />
             <StyledSectionTitle>
               <h4>{t('Notification method')}</h4>
+              <span className="required">*</span>
             </StyledSectionTitle>
             <NotificationMethod
               setting={notificationSettings[0]}

@@ -21,9 +21,12 @@ import { ExtraFormData, styled, t } from '@superset-ui/core';
 import Popover from 'src/common/components/Popover';
 import Icon from 'src/components/Icon';
 import { Pill } from 'src/dashboard/components/FiltersBadge/Styles';
-import { CascadeFilterControl, FilterControl } from './FilterBar';
-import { Filter, CascadeFilter, CurrentFilterState } from './types';
+import { CurrentFilterState } from 'src/dashboard/reducers/types';
 import { useFilterState } from './state';
+import FilterControl from './FilterControl';
+import CascadeFilterControl from './CascadeFilterControl';
+import { CascadeFilter } from './types';
+import { Filter } from '../types';
 
 interface CascadePopoverProps {
   filter: CascadeFilter;
@@ -105,7 +108,7 @@ const CascadePopover: React.FC<CascadePopoverProps> = ({
         return activeChildren;
       }
 
-      if (currentValue) {
+      if (currentValue !== undefined && currentValue !== null) {
         return [filter];
       }
 
